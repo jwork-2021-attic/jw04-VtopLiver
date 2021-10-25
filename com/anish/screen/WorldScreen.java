@@ -1,5 +1,6 @@
 package com.anish.screen;
-
+import java.io.*;
+import java.util.*;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
@@ -9,37 +10,54 @@ import com.anish.calabashbros.World;
 
 import asciiPanel.AsciiPanel;
 
-public class WorldScreen implements Screen {
+public class WorldScreen implements Screen{
 
     private World world;
-    private Calabash[] bros;
+    private Calabash[][] military;
     String[] sortSteps;
-
-    public WorldScreen() {
+    public final int SZ=16;
+    public WorldScreen() throws IOException{
         world = new World();
-
-        bros = new Calabash[7];
-
-        bros[3] = new Calabash(new Color(204, 0, 0), 1, world);
-        bros[5] = new Calabash(new Color(255, 165, 0), 2, world);
-        bros[1] = new Calabash(new Color(252, 233, 79), 3, world);
-        bros[0] = new Calabash(new Color(78, 154, 6), 4, world);
-        bros[4] = new Calabash(new Color(50, 175, 255), 5, world);
-        bros[6] = new Calabash(new Color(114, 159, 207), 6, world);
-        bros[2] = new Calabash(new Color(173, 127, 168), 7, world);
-
-        world.put(bros[0], 10, 10);
-        world.put(bros[1], 12, 10);
-        world.put(bros[2], 14, 10);
-        world.put(bros[3], 16, 10);
-        world.put(bros[4], 18, 10);
-        world.put(bros[5], 20, 10);
-        world.put(bros[6], 22, 10);
-
+        
+        military=new Calabash[SZ][SZ];
+        int[] tmp=new int[768];
+        File fl=new File("C:/Users/lenovo/Desktop/Java/jw02-VtopLiver/S191220144/source.txt");
+        int cnt=0;
+        try(Scanner sc=new Scanner(fl)){
+        while (sc.hasNext()) {
+            int value=sc.nextInt();
+            tmp[cnt++]=value;
+            //sc.close();
+        }
+        }
+        List<Integer> list=new ArrayList<>();
+        for(int i=0;i<SZ*SZ;i++){
+            list.add(i);
+        }
+        Collections.shuffle(list);
+        cnt=0;
+        
+        for(int i=0;i<SZ;i++){
+            for(int j=0;j<SZ;j++){
+                int tmmp=list.get(cnt);
+                cnt++;
+                military[i][j]=new Calabash(new Color(tmp[3*tmmp],tmp[3*tmmp+1],tmp[3*tmmp+2]), tmmp, world);
+            }
+        }
+        int row=2;
+        int col=2;
+        for(int i=0;i<SZ;i++){
+            row=2;
+            for(int j=0;j<SZ;j++){
+                world.put(military[i][j],row,col);
+                row+=3;
+            }
+            col+=3;
+        }
         BubbleSorter<Calabash> b = new BubbleSorter<>();
-        b.load(bros);
+        b.load(military);
         b.sort();
-
+        //System.out.println(b.getPlan());
         sortSteps = this.parsePlan(b.getPlan());
     }
 
@@ -47,16 +65,19 @@ public class WorldScreen implements Screen {
         return plan.split("\n");
     }
 
-    private void execute(Calabash[] bros, String step) {
+    private void execute(Calabash[][] bros, String step) {
         String[] couple = step.split("<->");
         getBroByRank(bros, Integer.parseInt(couple[0])).swap(getBroByRank(bros, Integer.parseInt(couple[1])));
     }
 
-    private Calabash getBroByRank(Calabash[] bros, int rank) {
-        for (Calabash bro : bros) {
-            if (bro.getRank() == rank) {
-                return bro;
+    private Calabash getBroByRank(Calabash[][] bros, int rank) {
+        for (int i=0;i<bros.length;i++) {
+            for(int j=0;j<bros[0].length;j++){
+                if (bros[i][j].getRank() == rank) {
+                    return bros[i][j];
+                }
             }
+            
         }
         return null;
     }
@@ -79,7 +100,7 @@ public class WorldScreen implements Screen {
     public Screen respondToUserInput(KeyEvent key) {
 
         if (i < this.sortSteps.length) {
-            this.execute(bros, sortSteps[i]);
+            this.execute(military, sortSteps[i]);
             i++;
         }
 
