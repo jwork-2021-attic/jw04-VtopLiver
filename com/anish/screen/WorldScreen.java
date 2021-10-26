@@ -11,10 +11,11 @@ import com.anish.calabashbros.World;
 import asciiPanel.AsciiPanel;
 
 public class WorldScreen implements Screen{
-
+    private ArrayList<Arrow> ar;
     private World world;
     private Calabash warrior;
     public WorldScreen() throws IOException{
+        ar=new ArrayList<>();
         world = new World();
         warrior=new Calabash(Color.green, 1, world);
         world.put(warrior, 0, 0);
@@ -44,12 +45,21 @@ public class WorldScreen implements Screen{
     public Screen respondToUserInput(KeyEvent key) {
         int xx=warrior.getX();
         int yy=warrior.getY();
+        for(var i:ar){
+            i.shrink();
+            if(i.getColor()==Color.WHITE){
+                //ar.remove(i);
+                world.put(world.getOriginThing(i.getX(), i.getY()),i.getX(),i.getY());
+            }
+                
+        }
         switch(key.getKeyCode()){
             case 37:{
                 if(world.legalNode(xx-1, yy)){
                     warrior.moveTo(xx-1,yy);
-                    
-                    world.put(new Arrow(world,(char) 27), xx, yy);
+                    Arrow a=new Arrow(world,(char) 27);
+                    world.put(a, xx, yy);
+                    ar.add(a);
                     //world.put(world.getOriginThing(xx, yy), xx, yy);
                 }
                 break;
@@ -57,21 +67,24 @@ public class WorldScreen implements Screen{
             case 38:{
                 if(world.legalNode(xx, yy-1)){
                     warrior.moveTo(xx,yy-1);
-                    world.put(new Arrow(world,(char) 24), xx, yy);
+                    Arrow a=new Arrow(world,(char) 24);
+                    world.put(a, xx, yy);ar.add(a);
                 }
                 break;
             }
             case 39:{
                 if(world.legalNode(xx+1, yy)){
                     warrior.moveTo(xx+1,yy);
-                    world.put(new Arrow(world,(char) 26), xx, yy);
+                    Arrow a=new Arrow(world,(char) 26);
+                    world.put(a, xx, yy);ar.add(a);
                 }
                 break;
             }
             case 40:{
                 if(world.legalNode(xx, yy+1)){
                     warrior.moveTo(xx,yy+1);
-                    world.put(new Arrow(world,(char) 25), xx, yy);
+                    Arrow a=new Arrow(world,(char) 25);
+                    world.put(a, xx, yy);ar.add(a);
                 }
                 break;
             }
